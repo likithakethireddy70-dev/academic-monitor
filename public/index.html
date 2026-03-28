@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Academic Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Login ── -->
+  <div id="login-screen" class="center-screen">
+    <div class="auth-card">
+      <div class="auth-logo">🎓</div>
+      <h1 class="auth-title">Academic Monitor</h1>
+      <p class="auth-sub">Sign in to your account</p>
+      <p class="auth-hint">First-time users: enter your User ID and role — leave password blank.</p>
+      <form id="login-form">
+        <div class="field">
+          <label>User ID</label>
+          <input type="text" id="l-userid" placeholder="Enter your User ID" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <select id="l-role">
+            <option value="">— Select your role —</option>
+            <option value="parent">Parent</option>
+            <option value="teacher">Teacher</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="l-pass" placeholder="Leave blank if first login" autocomplete="current-password" />
+        </div>
+        <div class="form-error hidden" id="login-error"></div>
+        <button type="submit" class="btn-primary w-full" id="login-btn">Sign In</button>
+        <p class="forgot-note">Forgot your password? Contact your administrator to reset it.</p>
+      </form>
+      <div class="demo-hint"><strong>Contact your administrator for your User ID.</strong></div>
+    </div>
+  </div>
+
+  <!-- ── Set Password ── -->
+  <div id="set-password-screen" class="center-screen hidden">
+    <div class="auth-card">
+      <div class="auth-logo">🔐</div>
+      <h1 class="auth-title">Set Your Password</h1>
+      <p class="auth-sub">Welcome! Create a secure password to continue.</p>
+      <p class="auth-hint" style="text-align:left;font-size:0.75rem">Password must have: 8+ characters · uppercase · lowercase · number · special character</p>
+      <form id="set-password-form">
+        <div class="field">
+          <label>New Password</label>
+          <input type="password" id="sp-new" placeholder="Minimum 8 characters" autocomplete="new-password" />
+        </div>
+        <div class="field">
+          <label>Confirm Password</label>
+          <input type="password" id="sp-confirm" placeholder="Re-enter password" autocomplete="new-password" />
+        </div>
+        <div class="form-error hidden" id="sp-error"></div>
+        <div class="alert-success hidden" id="sp-success"></div>
+        <button type="submit" class="btn-primary w-full" id="sp-btn">Set Password</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── App ── -->
+  <div id="app-screen" class="hidden">
+    <header class="nav">
+      <div class="nav-inner">
+        <div class="nav-brand">🎓 Academic Monitor</div>
+        <div class="nav-right">
+          <div class="nav-user-info">
+            <span class="nav-name" id="nav-name"></span>
+            <span class="nav-sub" id="nav-sub"></span>
+          </div>
+          <span class="role-badge" id="nav-role"></span>
+          <button class="btn-ghost" id="logout-btn">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+
+      <!-- ── TEACHER ── -->
+      <div id="view-teacher" class="view hidden">
+        <div class="card">
+          <h2 class="card-title">📝 Add Student Record</h2>
+          <p class="card-sub">Search for a student and enter their assessment details.</p>
+          <form id="record-form">
+            <div class="form-row">
+              <div class="field">
+                <label>Step 1 — Select Class</label>
+                <select id="r-class-select">
+                  <option value="">— Select class —</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Subject</label>
+                <input type="text" id="r-subject-display" readonly style="background:#f8fafc;color:#64748b" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label>Step 2 — Search Student</label>
+                <input type="text" id="r-student-search" placeholder="Select a class first…" autocomplete="off" disabled />
+                <div class="student-results hidden" id="student-results"></div>
+                <input type="hidden" id="r-student-id" />
+                <input type="hidden" id="r-student-name" />
+                <div class="selected-student hidden" id="selected-student"></div>
+              </div>
+              <div class="field">
+                <label>Topic</label>
+                <input type="text" id="r-topic" placeholder="e.g. Algebra, Photosynthesis…" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label>Marks (0–100)</label>
+                <input type="number" id="r-marks" min="0" max="100" placeholder="e.g. 72" />
+              </div>
+              <div class="field">
+                <label>Exam Date</label>
+                <input type="date" id="r-exam-date" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="field">
+                <label>Exam Type</label>
+                <select id="r-exam-type">
+                  <option value="">— Select —</option>
+                  <option>Class Test</option><option>Unit Test</option><option>Weekly Test</option>
+                  <option>Monthly Test</option><option>Assignment</option><option>Project</option>
+                  <option>Practical Exam</option><option>Half-Yearly Exam</option>
+                  <option>Pre-Final Exam</option><option>Final Exam</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Mistake Category</label>
+                <select id="r-mistake-cat">
+                  <option value="">— Select —</option>
+                  <option value="logic">Logic Error</option>
+                  <option value="concept">Concept Error</option>
+                  <option value="careless">Careless Mistake</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label>Mistake Description <span class="label-opt">(optional)</span></label>
+              <input type="text" id="r-mistake-desc" placeholder='e.g. "Incorrect formula used"' />
+            </div>
+            <div class="field">
+              <label>Teacher Remark <span class="label-opt">(optional)</span></label>
+              <textarea id="r-teacher-remark" rows="2" placeholder="Personal observation or suggestion…"></textarea>
+            </div>
+            <button type="submit" class="btn-primary">Save Record</button>
+          </form>
+          <div class="alert-success hidden" id="record-success">✓ Record saved successfully.</div>
+          <div class="form-error hidden" id="record-error"></div>
+        </div>
+
+        <div class="card recommendation-card hidden" id="recommendation-box">
+          <div class="rec-icon">📌</div>
+          <div style="flex:1">
+            <div class="rec-header-row">
+              <div class="rec-label">System Recommendation</div>
+              <span class="rec-cat-badge" id="rec-cat-badge"></span>
+            </div>
+            <div class="rec-text" id="rec-text"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title-row">
+            <h2 class="card-title">📋 Uploaded Records</h2>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <select id="filter-exam-type" style="padding:6px 10px;border-radius:7px;border:1px solid var(--border);font-size:0.82rem;font-family:inherit">
+                <option value="">All Exam Types</option>
+                <option>Class Test</option><option>Unit Test</option><option>Weekly Test</option>
+                <option>Monthly Test</option><option>Assignment</option><option>Project</option>
+                <option>Practical Exam</option><option>Half-Yearly Exam</option>
+                <option>Pre-Final Exam</option><option>Final Exam</option>
+              </select>
+              <button class="btn-ghost" id="load-records-btn">Load</button>
+            </div>
+          </div>
+          <div id="teacher-records-list"><p class="empty-msg">Click "Load" to view records.</p></div>
+        </div>
+      </div>
+
+      <!-- ── PARENT ── -->
+      <div id="view-parent" class="view hidden">
+        <div class="parent-header-card" id="parent-header-card"></div>
+
+        <!-- Performance Summary -->
+        <div class="summary-cards" id="parent-summary"></div>
+
+        <div class="stats-row" id="parent-stats"></div>
+        <div id="parent-alerts"></div>
+
+        <div class="charts-grid">
+          <div class="card chart-card">
+            <h3>📊 Subject-wise Average</h3>
+            <canvas id="parent-bar"></canvas>
+          </div>
+          <div class="card chart-card">
+            <h3>📈 Performance Trend <span class="trend-badge hidden" id="parent-trend-badge"></span></h3>
+            <canvas id="parent-line"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">💡 Insights & Summary</h2>
+          <div id="parent-insights" class="insights-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title-row">
+            <h2 class="card-title">📄 Recent Tests</h2>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <select id="parent-filter-subject" style="padding:6px 10px;border-radius:7px;border:1px solid var(--border);font-size:0.82rem;font-family:inherit">
+                <option value="">All Subjects</option>
+                <option>Maths</option><option>Science</option><option>English</option>
+                <option>Social</option><option>Computer</option>
+              </select>
+              <select id="parent-filter-exam" style="padding:6px 10px;border-radius:7px;border:1px solid var(--border);font-size:0.82rem;font-family:inherit">
+                <option value="">All Exam Types</option>
+                <option>Class Test</option><option>Unit Test</option><option>Weekly Test</option>
+                <option>Monthly Test</option><option>Assignment</option><option>Project</option>
+                <option>Practical Exam</option><option>Half-Yearly Exam</option>
+                <option>Pre-Final Exam</option><option>Final Exam</option>
+              </select>
+              <button class="btn-ghost" id="parent-filter-btn">Filter</button>
+              <button class="btn-ghost" id="parent-download-btn" style="color:var(--green);border-color:var(--green)">⬇ Download CSV</button>
+            </div>
+          </div>
+          <div id="parent-history"></div>
+        </div>
+      </div>
+
+      <!-- ── ADMIN ── -->
+      <div id="view-admin" class="view hidden">
+        <div class="stats-row" id="admin-stats"></div>
+        <div class="charts-grid">
+          <div class="card chart-card">
+            <h3>📊 Average Marks per Subject</h3>
+            <canvas id="admin-bar"></canvas>
+          </div>
+          <div class="card chart-card">
+            <h3>⚠️ Mistake Distribution</h3>
+            <canvas id="admin-pie"></canvas>
+          </div>
+          <div class="card chart-card chart-wide">
+            <h3>📈 Class Performance Trend <span class="trend-badge hidden" id="admin-trend-badge"></span></h3>
+            <canvas id="admin-line"></canvas>
+          </div>
+          <div class="card chart-card chart-wide">
+            <h3>🗂️ Average Marks by Exam Type</h3>
+            <div id="exam-type-avg" class="exam-type-list"></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">💡 Class Insights</h2>
+          <div id="admin-insights" class="insights-list"></div>
+        </div>
+
+        <!-- Admin: User Management -->
+        <div class="card">
+          <h2 class="card-title">🔐 User Password Reset</h2>
+          <p class="card-sub">Search for a user and reset their password. They will be required to set a new password on next login.</p>
+          <div class="form-row">
+            <div class="field">
+              <label>Search by User ID</label>
+              <input type="text" id="admin-search-id" placeholder="e.g. P001, T001…" />
+            </div>
+            <div class="field">
+              <label>Filter by Role</label>
+              <select id="admin-search-role">
+                <option value="">All Roles</option>
+                <option value="parent">Parent</option>
+                <option value="teacher">Teacher</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-ghost" id="admin-search-btn" style="margin-bottom:16px">Search</button>
+          <div id="admin-user-results"></div>
+          <div class="alert-success hidden" id="admin-reset-success"></div>
+          <div class="form-error hidden" id="admin-reset-error"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
