@@ -1,10 +1,19 @@
 const mongoose = require('mongoose');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/academic_monitor';
+const MONGO_URI = process.env.MONGO_URI;
 
 async function connectDB() {
-  await mongoose.connect(MONGO_URI);
-  console.log('MongoDB connected successfully');
+  if (!MONGO_URI) {
+    console.error('MONGO_URI environment variable is missing. Set it in Render dashboard.');
+    process.exit(1);
+  }
+
+  await mongoose.connect(MONGO_URI, {
+    useNewUrlParser:    true,
+    useUnifiedTopology: true,
+  });
+
+  console.log('Database connected');
 }
 
 module.exports = connectDB;

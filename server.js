@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express   = require('express');
 const path      = require('path');
 const crypto    = require('crypto');
@@ -552,10 +553,20 @@ app.get('/trend', async (req, res) => {
 });
 
 // ── Start ─────────────────────────────────────────────────
+console.log('Starting server...');
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+});
+
 const PORT = process.env.PORT || 5050;
 
 connectDB().then(() => {
-  app.listen(PORT, () => console.log(`Academic Monitor → http://localhost:${PORT}`));
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 }).catch(err => {
   console.error('Failed to connect to MongoDB:', err.message);
   process.exit(1);
