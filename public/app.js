@@ -12,7 +12,7 @@ let charts = {};
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('app-screen').classList.remove('hidden');
       document.getElementById('nav-name').textContent = currentUser.name || currentUser.user_id;
-      document.getElementById('nav-sub').textContent  = currentUser.role === 'teacher' ? `Class ${currentUser.class} · ${currentUser.subject}` : '';
+      document.getElementById('nav-sub').textContent  = currentUser.role === 'teacher' ? currentUser.subject || '' : '';
       document.getElementById('nav-role').textContent = currentUser.role;
       launchDashboard(currentUser);
     } catch { localStorage.removeItem('academicUser'); }
@@ -109,7 +109,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('app-screen').classList.remove('hidden');
     document.getElementById('nav-name').textContent = data.name || data.user_id;
-    document.getElementById('nav-sub').textContent  = data.role === 'teacher' ? `Class ${data.class} · ${data.subject}` : '';
+    document.getElementById('nav-sub').textContent  = data.role === 'teacher' ? data.subject || '' : '';
     document.getElementById('nav-role').textContent = data.role;
 
     launchDashboard(data);
@@ -199,8 +199,11 @@ function launchDashboard(user) {
 
   if (user.role === 'teacher') {
     document.getElementById('view-teacher').classList.remove('hidden');
-    document.getElementById('r-subject-display').value = user.subject || '';
-    buildClassDropdown(user.class);  // populate class dropdown from teacher's assigned classes
+    // Teachers see ALL classes 1–10
+    buildClassDropdown('1,2,3,4,5,6,7,8,9,10');
+    // Pre-select teacher's default subject if set
+    const subSel = document.getElementById('r-subject-display');
+    if (user.subject) subSel.value = user.subject;
     initDateField();
   }
   if (user.role === 'parent') {
@@ -332,7 +335,7 @@ document.getElementById('record-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const student_id   = document.getElementById('r-student-id').value.trim();
   const student_name = document.getElementById('r-student-name').value.trim();
-  const subject      = currentUser?.subject || document.getElementById('r-subject-display').value.trim();
+  const subject      = document.getElementById('r-subject-display').value.trim();
   const topic        = document.getElementById('r-topic').value.trim();
   const marks        = document.getElementById('r-marks').value;
   const exam_date    = document.getElementById('r-exam-date').value;
@@ -395,7 +398,8 @@ document.getElementById('record-form').addEventListener('submit', async (e) => {
 
     // Reset form
     e.target.reset();
-    document.getElementById('r-subject-display').value = currentUser?.subject || '';
+    const subSel = document.getElementById('r-subject-display');
+    if (currentUser?.subject) subSel.value = currentUser.subject;
     document.getElementById('r-student-id').value      = '';
     document.getElementById('r-student-name').value    = '';
     document.getElementById('selected-student').classList.add('hidden');
@@ -411,12 +415,14 @@ document.getElementById('record-form').addEventListener('submit', async (e) => {
 document.getElementById('load-records-btn').addEventListener('click', loadTeacherRecords);
 
 async function loadTeacherRecords() {
-  const listEl   = document.getElementById('teacher-records-list');
-  const examType = document.getElementById('filter-exam-type').value;
-  listEl.innerHTML = '<p class="empty-msg">Loading…</p>';
+  const listEl      = document.getElementById('teacher-records-list');
+  const examType    = document.getElementById('filter-exam-type').value;
+  const selectedCls = document.getElementById('r-class-select').value;
+  listEl.innerHTML  = '<p class="empty-msg">Loading…</p>';
 
   const params = new URLSearchParams();
-  if (currentUser?.class)   params.set('classes',   currentUser.class);
+  // Filter by currently selected class (if any), otherwise show all teacher's records
+  if (selectedCls)          params.set('classes',   selectedCls);
   if (currentUser?.subject) params.set('subject',   currentUser.subject);
   if (examType)             params.set('exam_type', examType);
 
