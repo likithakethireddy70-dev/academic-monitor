@@ -104,7 +104,7 @@ app.post('/login', async (req, res) => {
   if (!user_id || !role)
     return res.status(400).json({ error: 'User ID and role are required.' });
 
-  console.log('MongoDB login check:', user_id, role);
+  console.log(`[LOGIN] ${user_id} (${role})`);
 
   try {
     const user = await User.findOne({ user_id: user_id.trim(), role });
@@ -512,7 +512,7 @@ app.get('/alerts', async (req, res) => {
       const repeated = await Record.aggregate([
         { $match: { ...filter, mistake_category: { $ne: 'none' } } },
         { $group: { _id: { subject: '$subject', cat: '$mistake_category' }, cnt: { $sum: 1 } } },
-        { $match: { cnt: { $gt: 3 } } },
+        { $match: { cnt: { $gte: 2 } } },
         { $sort: { cnt: -1 } },
       ]);
       repeated.forEach(r => alerts.push({

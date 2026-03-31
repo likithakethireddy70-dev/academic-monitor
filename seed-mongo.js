@@ -2,8 +2,9 @@
  * seed-mongo.js — Import users.csv into MongoDB
  * Run: node seed-mongo.js
  */
-
 const mongoose = require('mongoose');
+require('dotenv').config();
+
 const fs       = require('fs');
 const path     = require('path');
 const User     = require('./models/User');
@@ -11,6 +12,7 @@ const User     = require('./models/User');
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/academic_monitor';
 
 async function seed() {
+  console.log("Using DB:", MONGO_URI)
   await mongoose.connect(MONGO_URI);
   console.log('MongoDB connected successfully');
 
